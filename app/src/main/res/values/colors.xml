@@ -2,4 +2,10 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="brand_green">#0E7A4F</color>
+    <color name="title_green">#145C3F</color>
+    <color name="bg_cream">#F4EFE7</color>
+    <color name="input_bg">#F3F1EC</color>
+    <color name="link_grey">#6A6A6A</color>
+    <color name="outline_beige">#CFC7BA</color>
 </resources>
