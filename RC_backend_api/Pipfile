@@ -10,6 +10,7 @@ gunicorn = "*"
 dj-database-url = "*"
 psycopg = {extras = ["binary"], version = "*"}
 pillow = "*"
+django-filter = "*"
 
 [dev-packages]
 

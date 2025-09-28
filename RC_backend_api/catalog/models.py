@@ -12,7 +12,7 @@ class Brand(models.Model):
         return self.brand_name
 
 class Racquet(models.Model):
-    brand_id = models.ForeignKey(Brand, on_delete=models.CASCADE)
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
     model_name = models.CharField(max_length=50)
     model_year = models.PositiveSmallIntegerField()
     head_size_in2 = models.PositiveSmallIntegerField()
@@ -26,7 +26,7 @@ class Racquet(models.Model):
     crosses = models.PositiveSmallIntegerField()
     
     def __str__(self):
-        return self.model_name + " " + self.model_year
+        return f"{self.model_name} {self.model_year}"
     
 def racquet_image_upload_to(instance, filename):
 
