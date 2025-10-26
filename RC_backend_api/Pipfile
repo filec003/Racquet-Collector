@@ -11,6 +11,7 @@ dj-database-url = "*"
 psycopg = {extras = ["binary"], version = "*"}
 pillow = "*"
 django-filter = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 
