@@ -2,8 +2,9 @@ package com.example.racquetcollector
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
 
 class LoginActivity : AppCompatActivity() {
 
@@ -11,13 +12,21 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        val loginButton = findViewById<Button>(R.id.btnLogin)
 
-        loginButton.setOnClickListener {
-            // Switch to MainActivity when button is clicked
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish() // prevents going back to login on Back press
+        val loginBtn = findViewById<MaterialButton>(R.id.btnLogin)
+        loginBtn.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
+
+
+        val forgot = findViewById<TextView>(R.id.forgotPassword)
+        forgot.setOnClickListener {
+            startActivity(Intent(this, ForgotPasswordActivity::class.java))
+        }
+        val createAccountBtn = findViewById<MaterialButton>(R.id.btnCreateAccount)
+        createAccountBtn.setOnClickListener {
+            startActivity(Intent(this, CreateAccountActivity::class.java))
         }
     }
 }
