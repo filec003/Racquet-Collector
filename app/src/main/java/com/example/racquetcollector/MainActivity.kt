@@ -1,5 +1,6 @@
 package com.example.racquetcollector
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
@@ -83,7 +84,7 @@ class MainActivity : AppCompatActivity() {
         }
         rootCol.addView(search)
 
-        // 2x2 grid made from two horizontal rows
+        // Clickable brand card that opens BrandPageActivity
         fun brandCard(label: String, tintHex: String): View {
             val cardBg = rounded(bg = Color.WHITE, stroke = Color.parseColor("#D9D4CC"), radius = 18f)
             return LinearLayout(this).apply {
@@ -93,6 +94,12 @@ class MainActivity : AppCompatActivity() {
                 layoutParams = LinearLayout.LayoutParams(0, dp(220), 1f).apply {
                     marginStart = dp(8); marginEnd = dp(8); topMargin = dp(8)
                 }
+
+                // Make it behave like a button
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { openBrandPage(label) }
+                contentDescription = "$label brand"
 
                 // Emoji “icon” (no drawables needed)
                 val icon = TextView(this@MainActivity).apply {
@@ -159,6 +166,12 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(sys.left, sys.top, sys.right, sys.bottom)
             insets
         }
+    }
+
+    private fun openBrandPage(name: String) {
+        val i = Intent(this, BrandPageActivity::class.java)
+        i.putExtra("brand_name", name) // literal key to avoid unresolved reference
+        startActivity(i)
     }
 
     private fun dp(v: Int): Int =
