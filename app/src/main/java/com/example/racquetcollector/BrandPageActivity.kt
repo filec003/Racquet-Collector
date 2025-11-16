@@ -13,7 +13,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.appbar.MaterialToolbar
@@ -30,12 +29,12 @@ class BrandPageActivity : AppCompatActivity() {
 
         val brandName = intent.getStringExtra("brand_name") ?: "Brand"
 
-        // Toolbar with back arrow
+        // Toolbar back arrow
         val toolbar = findViewById<MaterialToolbar>(R.id.brandToolbar)
-        toolbar.title = "" // big title below handles branding
+        toolbar.title = "" // Big title below handles branding
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        // Set big title
+        // Big title
         val brandTitleView = findViewById<TextView>(R.id.brandTitle)
         brandTitleView.text = "$brandName • Racquets"
 
@@ -50,6 +49,7 @@ class BrandPageActivity : AppCompatActivity() {
 
         // Render list + wire filter
         val list = findViewById<LinearLayout>(R.id.brandList)
+
         fun render(items: List<String>) {
             list.removeAllViews()
             if (items.isEmpty()) {
@@ -65,6 +65,7 @@ class BrandPageActivity : AppCompatActivity() {
                 items.forEach { model -> list.addView(exampleRow(model)) }
             }
         }
+
         render(examplesAll)
 
         val search = findViewById<EditText>(R.id.brandSearch)
@@ -73,13 +74,12 @@ class BrandPageActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val q = s?.toString()?.trim()?.lowercase().orEmpty()
-                val filtered = if (q.isEmpty()) examplesAll
-                else examplesAll.filter { it.lowercase().contains(q) }
+                val filtered = if (q.isEmpty()) examplesAll else examplesAll.filter { it.lowercase().contains(q) }
                 render(filtered)
             }
         })
 
-        // Edge-to-edge insets on root
+        // Edge-to-edge insets on root scroll
         val scroll = findViewById<View>(R.id.scroll)
         ViewCompat.setOnApplyWindowInsetsListener(scroll) { v, insets ->
             val sys = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -93,7 +93,7 @@ class BrandPageActivity : AppCompatActivity() {
         val ctx = this
         val container = LinearLayout(ctx).apply {
             orientation = LinearLayout.VERTICAL
-            background = ResourcesCompat.getDrawable(resources, R.drawable.bg_brand_item, theme)
+            setBackgroundResource(R.drawable.bg_brand_item) // simpler than ResourcesCompat
             setPadding(dp(16), dp(16), dp(16), dp(16))
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,

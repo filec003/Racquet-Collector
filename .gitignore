@@ -13,3 +13,19 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Android Studio/Gradle noise
+.idea/
+*.iml
+.gradle/
+local.properties
+**/build/
+
+
+# Android Studio/Gradle noise
+.idea/
+*.iml
+.gradle/
+local.properties
+**/build/
+
