@@ -11,6 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.RacquetCollector">
+
+        <!-- Launcher -->
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -20,9 +22,21 @@
             </intent-filter>
         </activity>
 
-        <!-- MainActivity no longer launches first -->
+        <!-- Main screen (post-login) -->
         <activity android:name=".MainActivity" />
 
+        <!-- Brand page (opened from MainActivity) -->
+        <activity
+            android:name=".BrandPageActivity"
+            android:exported="false" />
+
+        <!-- Auth helper screens -->
+        <activity
+            android:name=".CreateAccountActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
