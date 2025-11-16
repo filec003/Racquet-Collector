@@ -5,8 +5,15 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
+import com.example.racquetcollector.api.ApiClient
+import com.example.racquetcollector.api.ApiService
+import com.example.racquetcollector.api.RegisterRequest
+import kotlinx.coroutines.launch
 
 class CreateAccountActivity : AppCompatActivity() {
+
+    private lateinit var apiService: ApiService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,8 +25,14 @@ class CreateAccountActivity : AppCompatActivity() {
         val createBtn = findViewById<MaterialButton>(R.id.btnCreate)
         val backBtn = findViewById<MaterialButton>(R.id.btnBackToLogin)
 
+        //initialize ApiService
+        apiService = ApiClient.retrofit.create(ApiService::class.java)
+
         // Handle "Create Account"
         createBtn.setOnClickListener {
+            val firstName = findViewById<TextInputEditText>(R.id.etFirstName).text.toString()
+            val lastName = findViewById<TextInputEditText>(R.id.etLastName).text.toString()
+            val username = findViewById<TextInputEditText>(R.id.etUsername).text.toString()
             val email = emailInput.text.toString().trim()
             val pass = passwordInput.text.toString()
             val confirm = confirmInput.text.toString()
@@ -29,8 +42,19 @@ class CreateAccountActivity : AppCompatActivity() {
             } else if (pass != confirm) {
                 Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Account created for $email", Toast.LENGTH_SHORT).show()
-                finish() // returns to LoginActivity
+                lifecycleScope.launch {
+                try {
+                    apiService.register(RegisterRequest(username,pass,firstName,lastName,email))
+                    Toast.makeText(this@CreateAccountActivity, "Account created for $username", Toast.LENGTH_SHORT).show()
+                    finish() // returns to LoginActivity
+                } catch(e:Exception){
+                    Toast.makeText(this@CreateAccountActivity,
+                        "Account Creation Failed",
+                        Toast.LENGTH_LONG
+                        ).show()
+                }
+                }
+
             }
         }
 
