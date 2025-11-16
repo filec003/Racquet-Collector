@@ -1,10 +1,10 @@
-package com.example.racquetcollector   // ⚠️ use the same package name as your other activities
+package com.example.racquetcollector
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
-import android.widget.Toast
 
 class CreateAccountActivity : AppCompatActivity() {
 
@@ -18,25 +18,23 @@ class CreateAccountActivity : AppCompatActivity() {
         val createBtn = findViewById<MaterialButton>(R.id.btnCreate)
         val backBtn = findViewById<MaterialButton>(R.id.btnBackToLogin)
 
-        // Handle "Create Account"
         createBtn.setOnClickListener {
-            val email = emailInput.text.toString().trim()
-            val pass = passwordInput.text.toString()
-            val confirm = confirmInput.text.toString()
+            val email = emailInput.text?.toString()?.trim().orEmpty()
+            val pass = passwordInput.text?.toString().orEmpty()
+            val confirm = confirmInput.text?.toString().orEmpty()
 
-            if (email.isEmpty() || pass.isEmpty() || confirm.isEmpty()) {
-                Toast.makeText(this, "Please fill out all fields", Toast.LENGTH_SHORT).show()
-            } else if (pass != confirm) {
-                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Account created for $email", Toast.LENGTH_SHORT).show()
-                finish() // returns to LoginActivity
+            when {
+                email.isEmpty() || pass.isEmpty() || confirm.isEmpty() ->
+                    Toast.makeText(this, "Please fill out all fields", Toast.LENGTH_SHORT).show()
+                pass != confirm ->
+                    Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
+                else -> {
+                    Toast.makeText(this, "Account created for $email (mock)", Toast.LENGTH_SHORT).show()
+                    finish() // go back to LoginActivity
+                }
             }
         }
 
-        // Handle "Back to Log In"
-        backBtn.setOnClickListener {
-            finish() // goes back to LoginActivity
-        }
+        backBtn.setOnClickListener { finish() }
     }
 }

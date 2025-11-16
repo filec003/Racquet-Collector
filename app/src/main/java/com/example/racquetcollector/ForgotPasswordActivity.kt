@@ -11,12 +11,10 @@ class ForgotPasswordActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forgot_password)
 
-        // Back to Log In button
         val backButton = findViewById<MaterialButton>(R.id.btnBackToLogin)
         backButton.setOnClickListener {
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish() // closes this screen so Back won't return here again
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
         }
     }
 }
