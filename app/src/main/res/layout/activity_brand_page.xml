@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF8F0"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:id="@+id/rootCol"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingTop="24dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="24dp">
+
+        <!-- Top app bar with back arrow -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/brandToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:backgroundTint="#FFF8F0"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:title=""
+            />
+
+        <!-- Big title -->
+        <TextView
+            android:id="@+id/brandTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Brand • Racquets"
+            android:textColor="#104E3B"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <!-- Filter box -->
+        <EditText
+            android:id="@+id/brandSearch"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_brand_item"
+            android:hint="Filter models"
+            android:inputType="text"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp" />
+
+        <!-- List container (rows added in code) -->
+        <LinearLayout
+            android:id="@+id/brandList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical" />
+
+    </LinearLayout>
+</ScrollView>

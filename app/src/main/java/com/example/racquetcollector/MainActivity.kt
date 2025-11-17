@@ -1,5 +1,6 @@
 package com.example.racquetcollector
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
@@ -23,14 +24,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Root scroll container
         val scroll = ScrollView(this).apply {
             id = View.generateViewId()
-            setBackgroundColor(Color.parseColor("#FFF8F0")) // bg
+            setBackgroundColor(Color.parseColor("#FFF8F0"))
             isFillViewport = true
         }
 
-        // Vertical content column
         val rootCol = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(20), dp(24), dp(20), dp(24))
@@ -41,7 +40,6 @@ class MainActivity : AppCompatActivity() {
         }
         scroll.addView(rootCol)
 
-        // “Menu” placeholder (just text so we avoid drawable deps)
         val menu = TextView(this).apply {
             text = "≡"
             textSize = 24f
@@ -53,7 +51,6 @@ class MainActivity : AppCompatActivity() {
         }
         rootCol.addView(menu)
 
-        // Big two-line title
         fun titleLabel(txt: String) = TextView(this).apply {
             text = txt
             textSize = 36f
@@ -69,7 +66,6 @@ class MainActivity : AppCompatActivity() {
         rootCol.addView(titleLabel("RACQUET"))
         rootCol.addView(titleLabel("COLLECTOR"))
 
-        // Fake search box
         val searchBg = rounded(bg = Color.WHITE, stroke = Color.parseColor("#D9D4CC"))
         val search = EditText(this).apply {
             hint = "Search"
@@ -83,7 +79,6 @@ class MainActivity : AppCompatActivity() {
         }
         rootCol.addView(search)
 
-        // 2x2 grid made from two horizontal rows
         fun brandCard(label: String, tintHex: String): View {
             val cardBg = rounded(bg = Color.WHITE, stroke = Color.parseColor("#D9D4CC"), radius = 18f)
             return LinearLayout(this).apply {
@@ -94,16 +89,16 @@ class MainActivity : AppCompatActivity() {
                     marginStart = dp(8); marginEnd = dp(8); topMargin = dp(8)
                 }
 
-                // Emoji “icon” (no drawables needed)
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { openBrandPage(label) }
+                contentDescription = "$label brand"
+
                 val icon = TextView(this@MainActivity).apply {
                     text = "🎾"
                     textSize = 64f
                     setTextColor(Color.parseColor(tintHex))
                     gravity = Gravity.CENTER
-                    layoutParams = LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                    )
                 }
                 addView(icon)
 
@@ -121,39 +116,25 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        fun rowOf(vararg views: View): View {
-            return LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply { topMargin = dp(12) }
-                views.forEach { addView(it) }
-            }
+        fun rowOf(vararg views: View) = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(12) }
+            views.forEach { addView(it) }
         }
 
-        // Colors for each brand tint
         val head = "#F15A29"
         val wilson = "#1F7A4D"
         val babolat = "#F5A623"
         val prince = "#2A72B5"
 
-        rootCol.addView(
-            rowOf(
-                brandCard("HEAD", head),
-                brandCard("Wilson", wilson)
-            )
-        )
-        rootCol.addView(
-            rowOf(
-                brandCard("Babolat", babolat),
-                brandCard("Prince", prince)
-            )
-        )
+        rootCol.addView(rowOf(brandCard("HEAD", head), brandCard("Wilson", wilson)))
+        rootCol.addView(rowOf(brandCard("Babolat", babolat), brandCard("Prince", prince)))
 
         setContentView(scroll)
 
-        // Edge-to-edge insets padding on the programmatic root
         ViewCompat.setOnApplyWindowInsetsListener(scroll) { v, insets ->
             val sys = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(sys.left, sys.top, sys.right, sys.bottom)
@@ -161,20 +142,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun dp(v: Int): Int =
-        (v * resources.displayMetrics.density).toInt()
+    private fun openBrandPage(name: String) {
+        val i = Intent(this, BrandPageActivity::class.java)
+        i.putExtra("brand_name", name)
+        startActivity(i)
+    }
+
+    private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()
 
     private fun rounded(
         bg: Int,
         stroke: Int,
         radius: Float = 14f,
         strokeWidthDp: Int = 1
-    ): GradientDrawable {
-        return GradientDrawable().apply {
-            shape = GradientDrawable.RECTANGLE
-            cornerRadius = dp(radius.toInt()).toFloat()
-            setColor(bg)
-            setStroke(dp(strokeWidthDp), stroke)
-        }
+    ): GradientDrawable = GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = dp(radius.toInt()).toFloat()
+        setColor(bg)
+        setStroke(dp(strokeWidthDp), stroke)
     }
 }
+
