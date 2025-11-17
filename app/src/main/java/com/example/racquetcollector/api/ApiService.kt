@@ -36,10 +36,10 @@ data class RacquetResponse(
 data class RegisterRequest(val username: String, val password: String, val firstName: String, val lastName: String, val email: String)
 
 interface ApiService {
-    @POST("accounts/login")
+    @POST("accounts/login/")
     suspend fun login(@Body request: LoginRequest): TokenResponse
 
-    @POST("accounts/register")
+    @POST("accounts/register/")
     suspend fun register(@Body request: RegisterRequest)
 
     @GET("racquets/")

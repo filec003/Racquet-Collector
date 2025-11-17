@@ -10,6 +10,7 @@ import com.example.racquetcollector.api.ApiClient
 import com.example.racquetcollector.api.ApiService
 import com.example.racquetcollector.api.RegisterRequest
 import kotlinx.coroutines.launch
+import android.util.Log
 
 class CreateAccountActivity : AppCompatActivity() {
 
@@ -48,6 +49,7 @@ class CreateAccountActivity : AppCompatActivity() {
                     Toast.makeText(this@CreateAccountActivity, "Account created for $username", Toast.LENGTH_SHORT).show()
                     finish() // returns to LoginActivity
                 } catch(e:Exception){
+                    Log.e("CreateAccount", "Registration failed", e)
                     Toast.makeText(this@CreateAccountActivity,
                         "Account Creation Failed",
                         Toast.LENGTH_LONG
