@@ -2,6 +2,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
 from .models import Racquet, Brand
+from django.urls import reverse
 
 class RacquetAPITests(TestCase):
     def setUp(self):
@@ -56,6 +57,12 @@ class RacquetAPITests(TestCase):
         # Handle pagination
         results = response.data.get('results', response.data)
         self.assertEqual(len(results), 2)
+    
+    def test_get_racquets_by_brand_name(self):
+        url = reverse('racquet-list')
+        response = self.client.get(url,{'brand_name':'Wilson'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data(['results'])),1)
 
     def test_retrieve_racquet(self):
         """Test retrieving a single racquet by ID."""

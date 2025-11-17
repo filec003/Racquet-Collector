@@ -12,7 +12,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data   # <-- space after dash; correct path
     ports:
-      - "5432:5432"                       # <-- array item
+      - "5433:5432"                       # <-- array item
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
