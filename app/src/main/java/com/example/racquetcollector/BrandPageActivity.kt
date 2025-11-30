@@ -1,10 +1,12 @@
 package com.example.racquetcollector
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -15,12 +17,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.racquetcollector.api.ApiClient
+import com.example.racquetcollector.api.ApiService
+import com.example.racquetcollector.api.Racquet
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.launch
 
 class BrandPageActivity : AppCompatActivity() {
 
-    private lateinit var examplesAll: List<String>
+    private lateinit var racquetsAll: List<Racquet>
+    private val apiService: ApiService = ApiClient.retrofit.create(ApiService::class.java)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,19 +45,10 @@ class BrandPageActivity : AppCompatActivity() {
         val brandTitleView = findViewById<TextView>(R.id.brandTitle)
         brandTitleView.text = "$brandName • Racquets"
 
-        // Mock data per brand
-        examplesAll = when (brandName.lowercase()) {
-            "head"    -> listOf("Head Speed MP", "Head Radical Pro", "Head Gravity Tour")
-            "wilson"  -> listOf("Wilson Pro Staff 97", "Wilson Blade 98", "Wilson Ultra 100")
-            "babolat" -> listOf("Babolat Pure Drive", "Babolat Pure Aero", "Babolat Pure Strike")
-            "prince"  -> listOf("Prince Phantom 100", "Prince Tour 100", "Prince Legacy 105")
-            else      -> listOf("Example A", "Example B", "Example C")
-        }
-
         // Render list + wire filter
         val list = findViewById<LinearLayout>(R.id.brandList)
 
-        fun render(items: List<String>) {
+        fun render(items: List<Racquet>) {
             list.removeAllViews()
             if (items.isEmpty()) {
                 val empty = TextView(this).apply {
@@ -62,11 +60,20 @@ class BrandPageActivity : AppCompatActivity() {
                 }
                 list.addView(empty)
             } else {
-                items.forEach { model -> list.addView(exampleRow(model)) }
+                items.forEach { racquet -> list.addView(racquetRow(racquet)) }
             }
         }
 
-        render(examplesAll)
+        lifecycleScope.launch {
+            try {
+                val response = apiService.getRacquetsByBrand(brandName)
+                racquetsAll = response.results
+                render(racquetsAll)
+            } catch (e: Exception) {
+                Log.e("BrandPageActivity", "Error fetching racquets", e)
+                // Optionally show an error message to the user
+            }
+        }
 
         val search = findViewById<EditText>(R.id.brandSearch)
         search.addTextChangedListener(object : TextWatcher {
@@ -74,7 +81,7 @@ class BrandPageActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val q = s?.toString()?.trim()?.lowercase().orEmpty()
-                val filtered = if (q.isEmpty()) examplesAll else examplesAll.filter { it.lowercase().contains(q) }
+                val filtered = if (q.isEmpty()) racquetsAll else racquetsAll.filter { "${it.model_name} (${it.model_year})".lowercase().contains(q) }
                 render(filtered)
             }
         })
@@ -88,12 +95,12 @@ class BrandPageActivity : AppCompatActivity() {
         }
     }
 
-    /** Build one row (title + heart) and hook clicks to a BottomSheet */
-    private fun exampleRow(modelName: String): View {
+    /** Build one row (title + heart) and hook clicks to the detail page */
+    private fun racquetRow(racquet: Racquet): View {
         val ctx = this
         val container = LinearLayout(ctx).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundResource(R.drawable.bg_brand_item) // simpler than ResourcesCompat
+            setBackgroundResource(R.drawable.bg_brand_item)
             setPadding(dp(16), dp(16), dp(16), dp(16))
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -101,7 +108,8 @@ class BrandPageActivity : AppCompatActivity() {
             ).apply { topMargin = dp(12) }
             isClickable = true
             isFocusable = true
-            contentDescription = modelName
+            contentDescription = "${racquet.model_name} (${racquet.model_year})"
+            setOnClickListener { openDetailActivity(racquet) }
         }
 
         // Header row: title (left) + heart fav (right)
@@ -115,7 +123,7 @@ class BrandPageActivity : AppCompatActivity() {
         }
 
         val itemTitle = TextView(ctx).apply {
-            text = modelName
+            text = "${racquet.model_name} (${racquet.model_year})"
             textSize = 18f
             setTextColor(Color.parseColor("#333333"))
             setTypeface(Typeface.DEFAULT_BOLD)
@@ -123,13 +131,15 @@ class BrandPageActivity : AppCompatActivity() {
         headerRow.addView(itemTitle, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
 
         val fav = TextView(ctx).apply {
-            text = if (isFav(modelName)) "♥" else "♡"
+            text = if (isFav(racquet.id.toString())) "♥" else "♡"
             textSize = 18f
             setTextColor(Color.parseColor("#D23F57"))
             setPadding(dp(8), dp(8), dp(8), dp(8))
-            setOnClickListener {
-                toggleFav(modelName)
-                this.text = if (isFav(modelName)) "♥" else "♡"
+            setOnClickListener { view ->
+                toggleFav(racquet.id.toString())
+                this.text = if (isFav(racquet.id.toString())) "♥" else "♡"
+                // Prevent this click from triggering the container's click listener
+                view.parent.requestDisallowInterceptTouchEvent(true)
             }
         }
         headerRow.addView(fav)
@@ -137,48 +147,29 @@ class BrandPageActivity : AppCompatActivity() {
         container.addView(headerRow)
 
         val itemSubtitle = TextView(ctx).apply {
-            text = "Tap to view details (mock)"
+            text = "Tap to view details"
             textSize = 14f
             setTextColor(Color.parseColor("#6B6B6B"))
         }
         container.addView(itemSubtitle)
 
-        // Open quick details
-        container.setOnClickListener { showModelSheet(modelName) }
-
         return container
     }
 
-    /** Quick mock details in a BottomSheet */
-    private fun showModelSheet(modelName: String) {
-        val dialog = BottomSheetDialog(this)
-        val sheet = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(dp(20), dp(20), dp(20), dp(20))
+    private fun openDetailActivity(racquet: Racquet) {
+        val intent = Intent(this, RacquetDetailActivity::class.java).apply {
+            putExtra("racquet_details", racquet)
         }
-        val h = TextView(this).apply {
-            text = modelName
-            textSize = 20f
-            setTypeface(Typeface.DEFAULT_BOLD)
-        }
-        val sub = TextView(this).apply {
-            text = "Specs (mock): 300 g • 100 sq in • 16×19 • 320 mm balance"
-            textSize = 14f
-            setTextColor(Color.parseColor("#555555"))
-        }
-        sheet.addView(h)
-        sheet.addView(sub)
-        dialog.setContentView(sheet)
-        dialog.show()
+        startActivity(intent)
     }
 
     /** Favorites stored locally */
-    private fun isFav(model: String) =
-        getSharedPreferences("fav", MODE_PRIVATE).getBoolean(model, false)
+    private fun isFav(modelId: String) =
+        getSharedPreferences("fav", MODE_PRIVATE).getBoolean(modelId, false)
 
-    private fun toggleFav(model: String) {
+    private fun toggleFav(modelId: String) {
         val p = getSharedPreferences("fav", MODE_PRIVATE).edit()
-        p.putBoolean(model, !isFav(model)).apply()
+        p.putBoolean(modelId, !isFav(modelId)).apply()
     }
 
     private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()

@@ -1,6 +1,7 @@
 package com.example.racquetcollector.api
 
-
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.GET
@@ -9,6 +10,7 @@ import retrofit2.http.Query
 data class LoginRequest(val username: String, val password: String)
 data class TokenResponse(val refresh: String, val access: String)
 
+@Parcelize
 data class Racquet(
     val id: Int,
     val model_name: String,
@@ -23,7 +25,7 @@ data class Racquet(
     val balance_mm: Int,
     val mains: Int,
     val crosses: Int
-)
+) : Parcelable
 
 data class RacquetResponse(
     val count: Int,

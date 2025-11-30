@@ -35,6 +35,14 @@
             android:name=".BrandPageActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".CompareActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".RacquetDetailActivity"
+            android:exported="false" />
+
         <!-- Auth helper screens -->
         <activity
             android:name=".CreateAccountActivity"

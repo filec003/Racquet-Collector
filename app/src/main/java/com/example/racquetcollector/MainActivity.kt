@@ -15,42 +15,47 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import com.google.android.material.navigation.NavigationView
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var drawerLayout: DrawerLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Main content ScrollView
         val scroll = ScrollView(this).apply {
             id = View.generateViewId()
             setBackgroundColor(Color.parseColor("#FFF8F0"))
             isFillViewport = true
         }
 
+        // Root column inside ScrollView
         val rootCol = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(20), dp(24), dp(20), dp(24))
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
         }
         scroll.addView(rootCol)
 
+        // Hamburger menu icon
         val menu = TextView(this).apply {
             text = "≡"
-            textSize = 24f
+            textSize = 30f // Made it a bit bigger
+            setPadding(dp(8), dp(4), dp(8), dp(4))
             setTextColor(Color.parseColor("#104E3B"))
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
+            setOnClickListener {
+                drawerLayout.openDrawer(GravityCompat.START)
+            }
         }
         rootCol.addView(menu)
 
+        // Title
         fun titleLabel(txt: String) = TextView(this).apply {
             text = txt
             textSize = 36f
@@ -66,6 +71,7 @@ class MainActivity : AppCompatActivity() {
         rootCol.addView(titleLabel("RACQUET"))
         rootCol.addView(titleLabel("COLLECTOR"))
 
+        // Search bar
         val searchBg = rounded(bg = Color.WHITE, stroke = Color.parseColor("#D9D4CC"))
         val search = EditText(this).apply {
             hint = "Search"
@@ -133,11 +139,53 @@ class MainActivity : AppCompatActivity() {
         rootCol.addView(rowOf(brandCard("HEAD", head), brandCard("Wilson", wilson)))
         rootCol.addView(rowOf(brandCard("Babolat", babolat), brandCard("Prince", prince)))
 
-        setContentView(scroll)
+        // Navigation View
+        val navigationView = NavigationView(this).apply {
+            id = View.generateViewId()
+            layoutParams = DrawerLayout.LayoutParams(
+                DrawerLayout.LayoutParams.WRAP_CONTENT,
+                DrawerLayout.LayoutParams.MATCH_PARENT,
+                GravityCompat.START
+            )
+            inflateMenu(R.menu.nav_menu)
+            setNavigationItemSelectedListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.nav_home -> {
+                        drawerLayout.closeDrawer(GravityCompat.START)
+                    }
+                    R.id.nav_compare -> {
+                        startActivity(Intent(this@MainActivity, CompareActivity::class.java))
+                    }
+                    R.id.nav_logout -> {
+                        val intent = Intent(this@MainActivity, LoginActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                    }
+                }
+                menuItem.isChecked = true
+                drawerLayout.closeDrawer(GravityCompat.START)
+                true
+            }
+        }
 
-        ViewCompat.setOnApplyWindowInsetsListener(scroll) { v, insets ->
-            val sys = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(sys.left, sys.top, sys.right, sys.bottom)
+        // DrawerLayout as the root
+        drawerLayout = DrawerLayout(this).apply {
+            id = View.generateViewId()
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            // Add main content
+            addView(scroll)
+            // Add navigation drawer
+            addView(navigationView)
+        }
+
+        setContentView(drawerLayout)
+
+        ViewCompat.setOnApplyWindowInsetsListener(drawerLayout) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
     }
@@ -162,4 +210,3 @@ class MainActivity : AppCompatActivity() {
         setStroke(dp(strokeWidthDp), stroke)
     }
 }
-
