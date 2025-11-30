@@ -153,6 +153,9 @@ class MainActivity : AppCompatActivity() {
                     R.id.nav_home -> {
                         drawerLayout.closeDrawer(GravityCompat.START)
                     }
+                    R.id.nav_profile -> {
+                        startActivity(Intent(this@MainActivity, ProfileActivity::class.java))
+                    }
                     R.id.nav_compare -> {
                         startActivity(Intent(this@MainActivity, CompareActivity::class.java))
                     }

@@ -6,4 +6,6 @@
     <string name="log_in">Log In</string>
     <string name="forgot_password_q">Forgot password?</string>
     <string name="create_account">Create an account</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>

@@ -20,7 +20,7 @@ class Racquet(models.Model):
     unstrung_weight_g = models.PositiveSmallIntegerField()
     strung_weight_g = models.PositiveSmallIntegerField()
     swing_weight = models.PositiveSmallIntegerField()
-    twist_weight = models.PositiveSmallIntegerField()
+    twist_weight = models.FloatField()
     balance_mm = models.PositiveSmallIntegerField()
     mains = models.PositiveSmallIntegerField()
     crosses = models.PositiveSmallIntegerField()

@@ -1,5 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from catalog.models import Racquet  # Make sure Racquet is imported
+from catalog.serializers import RacquetSerializer
+from .models import RacquetCollection
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,3 +20,18 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
         return user
+
+class RacquetCollectionSerializer(serializers.ModelSerializer):
+    # This remains for reading the full racquet details in GET requests
+    racquet = RacquetSerializer(read_only=True)
+    
+    # Add this field for writing. It expects a racquet ID.
+    racquet_id = serializers.PrimaryKeyRelatedField(
+        queryset=Racquet.objects.all(), source='racquet', write_only=True
+    )
+
+    class Meta:
+        model = RacquetCollection
+        # Ensure all necessary fields are included
+        fields = ['id', 'racquet', 'racquet_id', 'added_on', 'notes']
+        read_only_fields = ['id', 'added_on'] # notes can be edited

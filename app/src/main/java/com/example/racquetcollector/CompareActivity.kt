@@ -7,7 +7,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Gravity
+import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -18,22 +20,30 @@ import android.widget.ListView
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import com.example.racquetcollector.api.ApiClient
 import com.example.racquetcollector.api.ApiService
 import com.example.racquetcollector.api.Racquet
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.navigation.NavigationView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class CompareActivity : AppCompatActivity() {
+class CompareActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    private val apiService by lazy { ApiClient.retrofit.create(ApiService::class.java) }
+    private val apiService by lazy { ApiClient.getClient() }
     private val brands = arrayOf("HEAD", "Wilson", "Babolat", "Prince")
 
     private var racquetOne: Racquet? = null
     private var racquetTwo: Racquet? = null
 
+    private lateinit var drawerLayout: DrawerLayout
     private lateinit var buttonOne: ImageButton
     private lateinit var buttonTwo: ImageButton
     private lateinit var textOne: TextView
@@ -46,6 +56,19 @@ class CompareActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_compare)
+
+        drawerLayout = findViewById(R.id.drawer_layout)
+        val toolbar = findViewById<MaterialToolbar>(R.id.compare_toolbar)
+        setSupportActionBar(toolbar)
+
+        val toggle = ActionBarDrawerToggle(
+            this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        )
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        val navigationView = findViewById<NavigationView>(R.id.nav_view)
+        navigationView.setNavigationItemSelectedListener(this)
 
         buttonOne = findViewById(R.id.button_add_racquet_one)
         buttonTwo = findViewById(R.id.button_add_racquet_two)
@@ -63,6 +86,30 @@ class CompareActivity : AppCompatActivity() {
 
         buyButtonOne.setOnClickListener { buyRacquet(racquetOne) }
         buyButtonTwo.setOnClickListener { buyRacquet(racquetTwo) }
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.nav_home -> {
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+            }
+            R.id.nav_profile -> {
+                val intent = Intent(this, ProfileActivity::class.java)
+                startActivity(intent)
+            }
+            R.id.nav_compare -> {
+                // Already on this screen, just close the drawer
+                drawerLayout.closeDrawer(GravityCompat.START)
+            }
+            R.id.nav_logout -> {
+                val intent = Intent(this, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+            }
+        }
+        drawerLayout.closeDrawer(GravityCompat.START)
+        return true
     }
 
     private fun selectRacquet(racquetNumber: Int) {
@@ -85,40 +132,56 @@ class CompareActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .create()
 
-        lifecycleScope.launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val response = apiService.getRacquetsByBrand(brand)
-                val racquets = response.results
-                val adapter = ArrayAdapter(this@CompareActivity, android.R.layout.simple_list_item_1, racquets.map { "${it.model_name} (${it.model_year})" })
-                racquetListView.adapter = adapter
+                val allRacquets = mutableListOf<Racquet>()
+                var response = apiService.getRacquetsByBrand(brand)
+                allRacquets.addAll(response.results)
 
-                racquetListView.setOnItemClickListener { _, _, position, _ ->
-                    val selectedRacquet = racquets[position]
-                    if (racquetNumber == 1) {
-                        racquetOne = selectedRacquet
-                        textOne.text = "${selectedRacquet.model_name}\n(${selectedRacquet.model_year})"
-                        textOne.visibility = View.VISIBLE
-                        buttonOne.visibility = View.GONE
-                    } else {
-                        racquetTwo = selectedRacquet
-                        textTwo.text = "${selectedRacquet.model_name}\n(${selectedRacquet.model_year})"
-                        textTwo.visibility = View.VISIBLE
-                        buttonTwo.visibility = View.GONE
-                    }
-                    updateCompareTable()
-                    dialog.dismiss()
+                var nextUrl = response.next
+                while (nextUrl != null) {
+                    val correctedUrl = nextUrl.replace("http://127.0.0.1:8000", "http://10.0.2.2:8000")
+                    response = apiService.getRacquetsNextPage(correctedUrl)
+                    allRacquets.addAll(response.results)
+                    nextUrl = if (response.next != correctedUrl) response.next else null
                 }
 
-                searchEditText.addTextChangedListener(object : TextWatcher {
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                        adapter.filter.filter(s)
+                withContext(Dispatchers.Main) {
+                    val adapter = ArrayAdapter(this@CompareActivity, android.R.layout.simple_list_item_1, allRacquets.map { "${it.model_name} (${it.model_year})" })
+                    racquetListView.adapter = adapter
+
+                    racquetListView.setOnItemClickListener { _, _, position, _ ->
+                        val selectedModelString = adapter.getItem(position)
+                        val selectedRacquet = allRacquets.find { "${it.model_name} (${it.model_year})" == selectedModelString }
+
+                        if (selectedRacquet != null) {
+                            if (racquetNumber == 1) {
+                                racquetOne = selectedRacquet
+                                textOne.text = "${selectedRacquet.model_name}\n(${selectedRacquet.model_year})"
+                                textOne.visibility = View.VISIBLE
+                                buttonOne.visibility = View.GONE
+                            } else {
+                                racquetTwo = selectedRacquet
+                                textTwo.text = "${selectedRacquet.model_name}\n(${selectedRacquet.model_year})"
+                                textTwo.visibility = View.VISIBLE
+                                buttonTwo.visibility = View.GONE
+                            }
+                            updateCompareTable()
+                            dialog.dismiss()
+                        }
                     }
-                    override fun afterTextChanged(s: Editable?) {}
-                })
+
+                    searchEditText.addTextChangedListener(object : TextWatcher {
+                        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                            adapter.filter.filter(s)
+                        }
+                        override fun afterTextChanged(s: Editable?) {}
+                    })
+                }
 
             } catch (e: Exception) {
-                // Handle error
+                Log.e("CompareActivity", "Error fetching racquets", e)
             }
         }
 

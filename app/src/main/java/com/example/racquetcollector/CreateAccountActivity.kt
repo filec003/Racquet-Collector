@@ -22,23 +22,27 @@ class CreateAccountActivity : AppCompatActivity() {
 
         val emailInput = findViewById<TextInputEditText>(R.id.etNewEmail)
         val passwordInput = findViewById<TextInputEditText>(R.id.etNewPassword)
+        val firstNameInput = findViewById<TextInputEditText>(R.id.etFirstName)
+        val lastNameInput = findViewById<TextInputEditText>(R.id.etLastName)
+        val usernameInput = findViewById<TextInputEditText>(R.id.etUsername)
         val confirmInput = findViewById<TextInputEditText>(R.id.etConfirmPassword)
         val createBtn = findViewById<MaterialButton>(R.id.btnCreate)
         val backBtn = findViewById<MaterialButton>(R.id.btnBackToLogin)
 
         //initialize ApiService
-        apiService = ApiClient.retrofit.create(ApiService::class.java)
+        apiService = ApiClient.getClient()
+
 
         // Handle "Create Account"
         createBtn.setOnClickListener {
-            val firstName = findViewById<TextInputEditText>(R.id.etFirstName).text.toString()
-            val lastName = findViewById<TextInputEditText>(R.id.etLastName).text.toString()
-            val username = findViewById<TextInputEditText>(R.id.etUsername).text.toString()
+            val firstName = firstNameInput.text.toString()
+            val lastName = lastNameInput.text.toString()
+            val username = usernameInput.text.toString()
             val email = emailInput.text.toString().trim()
             val pass = passwordInput.text.toString()
             val confirm = confirmInput.text.toString()
 
-            if (email.isEmpty() || pass.isEmpty() || confirm.isEmpty()) {
+            if (email.isEmpty() || pass.isEmpty() || confirm.isEmpty() || firstName.isEmpty() || lastName.isEmpty() || username.isEmpty()) {
                 Toast.makeText(this, "Please fill out all fields", Toast.LENGTH_SHORT).show()
             } else if (pass != confirm) {
                 Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()

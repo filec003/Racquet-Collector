@@ -59,9 +59,9 @@
             android:orientation="vertical"
             android:padding="20dp">
 
-            <!-- Email -->
+            <!-- Username -->
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/emailLayout"
+                android:id="@+id/usernameLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:boxBackgroundMode="filled"
@@ -70,13 +70,13 @@
                 app:boxCornerRadiusBottomStart="10dp"
                 app:boxCornerRadiusBottomEnd="10dp"
                 app:boxBackgroundColor="#F3F1EC"
-                android:hint="Email">
+                android:hint="Username">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEmail"
+                    android:id="@+id/etUsername"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress"/>
+                    android:inputType="text"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <Space android:layout_width="1dp" android:layout_height="12dp"/>

@@ -1,5 +1,6 @@
 package com.example.racquetcollector
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
@@ -22,26 +23,30 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         // Initialize ApiService
-        apiService = ApiClient.retrofit.create(ApiService::class.java)
+        apiService = ApiClient.getClient()
 
-        val emailEditText = findViewById<TextInputEditText>(R.id.etEmail)
+        val usernameEditText = findViewById<TextInputEditText>(R.id.etUsername)
         val passwordEditText = findViewById<TextInputEditText>(R.id.etPassword)
         val loginBtn = findViewById<MaterialButton>(R.id.btnLogin)
 
         loginBtn.setOnClickListener {
-            val userEmail = emailEditText.text.toString()
+            val userName = usernameEditText.text.toString()
             val userPassword = passwordEditText.text.toString()
 
             // Launch a coroutine for the network call
             lifecycleScope.launch {
                 try {
                     val tokenResponse = apiService.login(
-                        LoginRequest(userEmail, userPassword)
+                        LoginRequest(userName, userPassword)
                     )
+                    // Save the token
+                    val sharedPreferences = getSharedPreferences("auth", Context.MODE_PRIVATE)
+                    sharedPreferences.edit().putString("token", tokenResponse.access).apply()
+
                     // Login successful, move to MainActivity
                     Toast.makeText(
                         this@LoginActivity,
-                        "Login successful! Access token: ${tokenResponse.access}",
+                        "Login successful!",
                         Toast.LENGTH_LONG
                     ).show()
                     startActivity(Intent(this@LoginActivity, MainActivity::class.java))
