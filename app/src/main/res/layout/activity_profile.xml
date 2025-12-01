@@ -61,11 +61,22 @@
 
     </androidx.cardview.widget.CardView>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/find_stores_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="Find Stores Near Me"
+        app:backgroundTint="#0E7A4F"
+        android:textColor="@android:color/white"/>
+
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="4dp">
 
